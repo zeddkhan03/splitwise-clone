@@ -1,0 +1,3112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="theme-color" content="#121212" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Splitza Pro</title>
+
+    <link
+      rel="icon"
+      href="https://www.favicon.cc/logo3d/737096.png"
+      type="image/x-icon"
+    />
+    <link rel="manifest" href="manifest.json" />
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import {
+        getAuth,
+        signInWithPopup,
+        GoogleAuthProvider,
+        signOut,
+        onAuthStateChanged,
+        deleteUser,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import {
+        getDatabase,
+        ref,
+        set,
+        push,
+        onValue,
+        update,
+        remove,
+        get,
+        child,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDYf2Xh6NSO2U4NWD-hhYiC5D4HvvzWyzI",
+        authDomain: "splitza.firebaseapp.com",
+        databaseURL:
+          "https://splitza-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "splitza",
+        storageBucket: "splitza.firebasestorage.app",
+        messagingSenderId: "959588782033",
+        appId: "1:959588782033:web:f77508f2d933aac86c9af0",
+        measurementId: "G-HBGSJTBSBH",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getDatabase(app);
+      const provider = new GoogleAuthProvider();
+
+      window.FB = {
+        auth,
+        db,
+        provider,
+        ref,
+        set,
+        push,
+        onValue,
+        update,
+        remove,
+        get,
+        child,
+        signInWithPopup,
+        signOut,
+        deleteUser,
+        onAuthStateChanged,
+      };
+      window.dispatchEvent(new Event("firebaseLoaded"));
+    </script>
+
+    <style>
+      /* --- THEME VARIABLES --- */
+      :root {
+        --bg: #050505;
+        --card: #141414;
+        --input: #1f1f1f;
+        --text: #fff;
+        --sub: #888;
+        --border: #333;
+        --grad: linear-gradient(135deg, #6c5ce7 0%, #a55eea 100%);
+        --accent: #00cec9;
+        --danger: #ff4757;
+        --radius: 16px;
+        --wa: #25d366;
+        --gold: #f1c40f;
+        --gold-glow: rgba(241, 196, 15, 0.15);
+        --green-grad: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+        --warn: #ffa502;
+      }
+      [data-theme="light"] {
+        --bg: #f4f7f6;
+        --card: #fff;
+        --input: #f0f2f5;
+        --text: #333;
+        --sub: #666;
+        --border: #e1e4e8;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Inter", sans-serif;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+        font-size: 14px;
+        transition: background 0.3s;
+      }
+      .app-container {
+        width: 100%;
+        max-width: 480px;
+        padding-bottom: 100px;
+        position: relative;
+      }
+      .hidden {
+        display: none !important;
+      }
+
+      /* UI COMPONENTS */
+      .btn {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: var(--radius);
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-primary {
+        background: var(--grad);
+        color: white;
+        box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+      }
+      .btn-google {
+        background: #fff;
+        color: #333;
+      }
+      .btn-outline {
+        background: var(--card);
+        border: 1px solid var(--border);
+        color: var(--sub);
+      }
+      .btn-wa {
+        background: rgba(37, 211, 102, 0.15);
+        color: var(--wa);
+        border: 1px solid var(--wa);
+      }
+      .btn-danger {
+        background: rgba(255, 71, 87, 0.15);
+        color: var(--danger);
+        border: 1px solid var(--danger);
+      }
+
+      .btn-remind {
+        background: transparent;
+        color: var(--gold);
+        border: 1.5px solid var(--gold);
+        font-size: 12px;
+        padding: 8px 16px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-weight: 700;
+        box-shadow: 0 0 10px var(--gold-glow);
+      }
+      .btn-paid {
+        background: var(--green-grad);
+        color: #fff;
+        border: none;
+        font-size: 12px;
+        padding: 9.5px 18px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .btn-paid:active {
+        transform: scale(0.95);
+      }
+
+      .btn-text {
+        background: transparent;
+        color: var(--accent);
+        border: none;
+        cursor: pointer;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 0;
+      }
+
+      .card {
+        background: var(--card);
+        border-radius: var(--radius);
+        padding: 20px;
+        margin-bottom: 15px;
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 14px;
+        background: var(--input);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 12px;
+        outline: none;
+        margin-bottom: 12px;
+        font-size: 14px;
+      }
+      input:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* HEADER */
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        height: 40px;
+      }
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+      .logo-icon {
+        width: 28px;
+        height: 28px;
+        stroke: url(#grad1);
+      }
+      .logo-text {
+        font-weight: 800;
+        font-size: 20px;
+        letter-spacing: -0.5px;
+        background: var(--grad);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-size: cover;
+        background-position: center;
+        border: 2px solid var(--card);
+        background-color: var(--input);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: #fff;
+        text-transform: uppercase;
+      }
+      .user-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--input);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      /* LANDING */
+      #landingView {
+        text-align: center;
+        padding-top: 50px;
+      }
+      .landing-hero {
+        font-size: 48px;
+        font-weight: 900;
+        line-height: 1.1;
+        margin-bottom: 10px;
+        background: var(--grad);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* TRIP VIEWS */
+      .trip-banner {
+        height: 160px;
+        border-radius: var(--radius);
+        margin-bottom: 15px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        padding: 20px;
+        overflow: hidden;
+        background-color: var(--input);
+      }
+      .trip-banner::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+      }
+      .trip-meta {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+      }
+      .trip-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: white;
+        margin: 0;
+        line-height: 1.1;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      }
+      .trip-loc {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 4px;
+      }
+
+      .action-group {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+      .action-btn {
+        flex: 1;
+        padding: 10px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        color: var(--text);
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        font-size: 11px;
+        transition: 0.2s;
+      }
+      .action-btn svg {
+        width: 20px;
+        height: 20px;
+        stroke: var(--sub);
+      }
+      .action-btn.danger {
+        color: var(--danger);
+        border-color: rgba(255, 71, 87, 0.3);
+      }
+      .action-btn.danger svg {
+        stroke: var(--danger);
+      }
+
+      /* STATS & LISTS */
+      .stat-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .stat-box {
+        background: var(--input);
+        padding: 15px;
+        border-radius: 12px;
+        text-align: center;
+      }
+      .stat-val {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .stat-lbl {
+        font-size: 11px;
+        color: var(--sub);
+        text-transform: uppercase;
+        margin-top: 5px;
+      }
+
+      .tx-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .settle-card {
+        background: linear-gradient(
+          to right,
+          rgba(108, 92, 231, 0.1),
+          transparent
+        );
+        border-left: 4px solid #6c5ce7;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .settle-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      /* SPLIT UI */
+      .split-tabs {
+        display: flex;
+        background: var(--input);
+        padding: 4px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+      }
+      .split-tab {
+        flex: 1;
+        text-align: center;
+        padding: 8px;
+        color: var(--sub);
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .split-tab.active {
+        background: var(--card);
+        color: var(--text);
+        font-weight: 700;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .pill-check input {
+        display: none;
+      }
+      .pill-check label {
+        display: flex;
+        align-items: center;
+        padding: 8px 14px;
+        background: var(--input);
+        border-radius: 20px;
+        cursor: pointer;
+        color: var(--sub);
+        border: 1px solid var(--border);
+      }
+      .pill-check input:checked + label {
+        background: var(--grad);
+        color: white;
+        border-color: transparent;
+      }
+      .uneq-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      /* --- CONTROL BAR --- */
+      .control-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+      .ctrl-btn {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px 0;
+        color: var(--text);
+        font-size: 11px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        transition: 0.2s;
+      }
+      .ctrl-btn.active {
+        background: var(--input);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .ctrl-btn svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        stroke-width: 2;
+      }
+
+      /* --- DAILY PLANNER & CALENDAR --- */
+      .collapsible-section {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out;
+        margin-bottom: 0;
+        opacity: 0;
+      }
+      .collapsible-section.expanded {
+        max-height: 500px;
+        margin-bottom: 15px;
+        opacity: 1;
+      }
+
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .cal-day {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-size: 12px;
+        background: var(--input);
+        color: var(--sub);
+        cursor: pointer;
+        border: 1px solid transparent;
+      }
+      .cal-day.active {
+        border-color: var(--text);
+        color: var(--text);
+        font-weight: 700;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      }
+      .cal-day.good {
+        background: rgba(0, 184, 148, 0.15);
+        color: #00b894;
+      }
+      .cal-day.warn {
+        background: rgba(255, 165, 2, 0.15);
+        color: #ffa502;
+      }
+      .cal-day.bad {
+        background: rgba(255, 71, 87, 0.15);
+        color: #ff4757;
+      }
+
+      .cat-scroll {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .cat-chip {
+        padding: 6px 12px;
+        border-radius: 20px;
+        background: var(--input);
+        color: var(--sub);
+        font-size: 11px;
+        white-space: nowrap;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .cat-chip.selected {
+        background: var(--text);
+        color: var(--bg);
+        border-color: var(--text);
+        font-weight: 700;
+      }
+      .month-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      .daily-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px;
+        background: var(--input);
+        border-radius: 12px;
+        margin-bottom: 8px;
+        align-items: center;
+      }
+      .daily-cat {
+        font-size: 10px;
+        background: var(--card);
+        padding: 2px 6px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        margin-right: 8px;
+      }
+
+      /* --- FIXED EXPENSE CHIPS --- */
+      .fixed-container {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+      }
+      .fixed-chip {
+        background: rgba(108, 92, 231, 0.1);
+        color: var(--text);
+        border: 1px dashed var(--sub);
+        padding: 8px 12px;
+        border-radius: 10px;
+        font-size: 11px;
+        white-space: nowrap;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .fixed-chip:active {
+        background: rgba(108, 92, 231, 0.3);
+      }
+
+      /* MODALS & SEARCH */
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(8px);
+      }
+      .modal.open {
+        display: flex;
+        animation: fadeIn 0.2s ease-out;
+      }
+      .modal-content {
+        background: var(--card);
+        width: 90%;
+        max-width: 420px;
+        padding: 25px;
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        position: relative;
+      }
+      .modal-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .full-width-btn {
+        grid-column: span 2;
+      }
+
+      #locResults {
+        background: var(--input);
+        border-radius: 0 0 12px 12px;
+        max-height: 150px;
+        overflow-y: auto;
+        position: absolute;
+        width: calc(100% - 50px);
+        z-index: 10;
+        border: 1px solid var(--border);
+        display: none;
+        margin-top: -12px;
+      }
+      .loc-item {
+        padding: 12px;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+        color: var(--text);
+      }
+      .loc-item:hover {
+        background: var(--border);
+      }
+
+      .member-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .member-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .remove-icon {
+        color: var(--danger);
+        cursor: pointer;
+        font-size: 18px;
+        padding: 5px;
+      }
+
+      /* STAT SUMMARY */
+      .stat-person {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px dashed var(--border);
+      }
+      .stat-person-header {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+
+      /* JOKES */
+      .joke-opt {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+        background: var(--input);
+      }
+      .joke-opt:hover {
+        border-color: var(--accent);
+      }
+      .joke-opt input {
+        width: 18px;
+        height: 18px;
+        margin: 0 12px 0 0;
+        cursor: pointer;
+        accent-color: var(--accent);
+      }
+      .joke-text {
+        font-size: 14px;
+        color: var(--text);
+        line-height: 1.4;
+      }
+
+      /* BOTTOM NAV */
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: var(--card);
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-around;
+        padding: 12px;
+        z-index: 500;
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+      }
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: var(--sub);
+        font-size: 10px;
+        cursor: pointer;
+        transition: 0.2s;
+        opacity: 0.6;
+      }
+      .nav-item svg {
+        width: 24px;
+        height: 24px;
+        stroke: currentColor;
+        margin-bottom: 4px;
+      }
+      .nav-item.active {
+        color: var(--accent);
+        opacity: 1;
+      }
+      .nav-item.active svg {
+        stroke: var(--accent);
+      }
+
+      /* PWA POPUP */
+      #pwaPopup {
+        position: fixed;
+        bottom: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--card);
+        border: 1px solid var(--border);
+        padding: 15px 20px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        z-index: 200;
+        transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        width: 90%;
+        max-width: 350px;
+      }
+      /* Adds extra padding so the iPhone home bar doesn't cover it */
+      #pwaPopup.show {
+        bottom: calc(62px + env(safe-area-inset-bottom));
+      }
+      .pwa-info {
+        flex-grow: 1;
+      }
+      .pwa-title {
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--text);
+      }
+      .pwa-sub {
+        font-size: 11px;
+        color: var(--sub);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="appLoader"
+      style="
+        position: fixed;
+        inset: 0;
+        background: var(--bg);
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <svg
+        width="60"
+        height="60"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="url(#grad1)"
+        stroke-width="1.5"
+      >
+        <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+        <path
+          d="M22 12A10 10 0 0 0 12 2v10z"
+          fill="url(#grad1)"
+          stroke="none"
+        />
+      </svg>
+    </div>
+
+    <svg width="0" height="0">
+      <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color: #6c5ce7; stop-opacity: 1" />
+        <stop offset="100%" style="stop-color: #a55eea; stop-opacity: 1" />
+      </linearGradient>
+    </svg>
+
+    <div id="landingView" class="app-container hidden">
+      <div class="landing-hero" style="margin-top: 50px">SPLITZA</div>
+      <p
+        style="
+          color: var(--sub);
+          margin-bottom: 40px;
+          font-size: 16px;
+          text-align: center;
+        "
+      >
+        Trips with friends,<br />minus the math.
+      </p>
+      <div class="card" style="border: none; background: transparent">
+        <button class="btn btn-google" onclick="Auth.login()">
+          <img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            width="18"
+          />
+          Continue with Google
+        </button>
+        <p
+          id="inviteAlert"
+          style="
+            color: var(--accent);
+            font-size: 12px;
+            margin-top: 15px;
+            display: none;
+            text-align: center;
+          "
+        >
+          You were invited to a trip! Login to join.
+        </p>
+      </div>
+    </div>
+
+    <div id="mainView" class="app-container hidden">
+      <header>
+        <div class="logo-container" id="navLogo" onclick="App.goHome()">
+          <svg
+            id="navIcon"
+            class="logo-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="url(#grad1)"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 12h16M4 12l6-6m-6 6l6 6" />
+          </svg>
+          <div class="logo-text">Splitza</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px">
+          <div class="user-badge" onclick="UI.toggleTheme()">Vibe</div>
+          <div class="user-badge" onclick="UI.openModal('profileModal')">
+            <div id="myAvatar" class="avatar"></div>
+            <span id="myHandle">Me</span>
+          </div>
+        </div>
+      </header>
+
+      <div id="viewTrips" class="view-section">
+        <div id="homeTab">
+          <div class="stat-grid">
+            <div class="stat-box">
+              <div class="stat-val" id="globalOwe">₹0</div>
+              <div class="stat-lbl">You Owe</div>
+            </div>
+            <div class="stat-box">
+              <div
+                class="stat-val"
+                id="globalOwed"
+                style="color: var(--accent)"
+              >
+                ₹0
+              </div>
+              <div class="stat-lbl">You are Owed</div>
+            </div>
+          </div>
+          <button
+            class="btn btn-primary"
+            onclick="UI.openModal('createTripModal')"
+          >
+            + Create Trip
+          </button>
+          <h3
+            style="
+              font-size: 12px;
+              color: var(--sub);
+              text-transform: uppercase;
+              margin: 20px 0 10px;
+            "
+          >
+            My Trips
+          </h3>
+          <div id="tripsList"></div>
+        </div>
+
+        <div id="tripTab" class="hidden">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 10px;
+            "
+          >
+            <button class="btn-text" onclick="App.goHome()">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              All Trips
+            </button>
+          </div>
+          <div id="tripBanner" class="trip-banner">
+            <div class="trip-meta">
+              <h2 id="tripTitle" class="trip-title">Loading...</h2>
+              <div class="trip-loc">
+                <span id="tripLocState">Location</span> •
+                <span id="tripMemberCount">0</span> Members
+              </div>
+            </div>
+          </div>
+          <div class="action-group">
+            <div class="action-btn" onclick="App.shareTrip()">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                <polyline points="16 6 12 2 8 6" />
+                <line x1="12" y1="2" x2="12" y2="15" />
+              </svg>
+              Invite
+            </div>
+            <div class="action-btn" onclick="App.openManageMembers()">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              Members
+            </div>
+            <div class="action-btn" onclick="App.showSummary()">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+              </svg>
+              Stats
+            </div>
+            <div id="deleteBtnContainer" style="display: contents"></div>
+          </div>
+
+          <div class="card">
+            <h4 style="margin-bottom: 10px">Add Expense</h4>
+            <div style="display: flex; gap: 10px">
+              <input type="text" id="desc" placeholder="What? (e.g. Dinner)" />
+              <input
+                type="number"
+                id="amt"
+                placeholder="₹ Total"
+                style="width: 40%"
+              />
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px">
+              <select id="payer"></select>
+              <select id="category">
+                <option value="Food">Food</option>
+                <option value="Travel">Travel</option>
+                <option value="Stay">Stay</option>
+                <option value="Fun">Fun</option>
+                <option value="Misc">Misc</option>
+              </select>
+            </div>
+            <div class="split-tabs">
+              <div
+                class="split-tab active"
+                id="tabEq"
+                onclick="App.setSplit('equal')"
+              >
+                Equal
+              </div>
+              <div
+                class="split-tab"
+                id="tabUneq"
+                onclick="App.setSplit('unequal')"
+              >
+                Exact
+              </div>
+            </div>
+            <div id="areaEq" class="pills"></div>
+            <div id="areaUneq" class="hidden"></div>
+            <button class="btn btn-primary" onclick="App.addTx()">
+              Add Expense
+            </button>
+          </div>
+
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: 25px;
+              margin-bottom: 10px;
+            "
+          >
+            <h3
+              style="
+                font-size: 12px;
+                color: var(--sub);
+                text-transform: uppercase;
+                margin: 0;
+              "
+            >
+              Settlements
+            </h3>
+          </div>
+          <div id="settlements"></div>
+
+          <h3
+            style="
+              font-size: 12px;
+              color: var(--sub);
+              text-transform: uppercase;
+              margin: 25px 0 10px;
+            "
+          >
+            Transactions
+          </h3>
+          <input
+            type="text"
+            id="txSearch"
+            placeholder="Search expenses..."
+            style="margin-bottom: 10px; font-size: 13px; padding: 10px"
+            onkeyup="App.renderStats(tripsData[currentTripId])"
+          />
+          <div id="history"></div>
+        </div>
+      </div>
+
+      <div id="viewDaily" class="view-section hidden">
+        <div class="control-bar">
+          <div class="ctrl-btn" id="btnCal" onclick="Daily.toggleCalendar()">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line></svg
+            >Calendar
+          </div>
+          <div class="ctrl-btn" id="btnStats" onclick="Daily.toggleStats()">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line></svg
+            >Stats
+          </div>
+          <div class="ctrl-btn" onclick="UI.openModal('fixedModal')">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="3"></circle>
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+              ></path></svg
+            >Recurring
+          </div>
+          <div class="ctrl-btn" onclick="Daily.editLimit()">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg
+            >Limit
+          </div>
+        </div>
+
+        <div id="calSection" class="card collapsible-section">
+          <div class="month-header">
+            <h3 id="currentMonthDisplay" style="margin: 0">Month</h3>
+            <div style="font-size: 11px; color: var(--sub)">
+              Total:
+              <span
+                id="monthTotalDisplay"
+                style="color: var(--text); font-weight: 700"
+                >₹0</span
+              >
+            </div>
+          </div>
+          <div id="calendarContainer" class="calendar-grid"></div>
+        </div>
+
+        <div id="statsSection" class="card collapsible-section">
+          <h4 style="margin-bottom: 10px">Date Range Stats</h4>
+          <div style="display: flex; gap: 10px; margin-bottom: 10px">
+            <div style="flex: 1">
+              <label style="font-size: 10px; color: var(--sub)">FROM</label
+              ><input type="date" id="rangeStart" style="margin: 0" />
+            </div>
+            <div style="flex: 1">
+              <label style="font-size: 10px; color: var(--sub)">TO</label
+              ><input type="date" id="rangeEnd" style="margin: 0" />
+            </div>
+          </div>
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 15px;
+            "
+          >
+            <div style="font-size: 13px; color: var(--sub)">
+              Total:
+              <b id="rangeTotal" style="color: var(--text); font-size: 16px"
+                >₹0</b
+              >
+            </div>
+            <button
+              class="btn-outline"
+              style="width: auto; padding: 8px 16px"
+              onclick="Daily.filterRange()"
+            >
+              Check
+            </button>
+          </div>
+          <button class="btn btn-outline" onclick="Daily.exportRange()">
+            Download CSV
+          </button>
+        </div>
+
+        <div class="card" style="padding: 15px">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+            "
+          >
+            <div style="font-size: 11px; color: var(--sub)">
+              Daily Budget (<b id="selectedDateDisplay">Today</b>)
+            </div>
+            <div style="font-size: 11px">
+              <span id="daySpent">0</span> / <span id="dayLimit">2000</span>
+            </div>
+          </div>
+          <div
+            style="
+              height: 6px;
+              width: 100%;
+              background: var(--input);
+              border-radius: 4px;
+              margin-top: 8px;
+              overflow: hidden;
+            "
+          >
+            <div
+              id="dayProgressBar"
+              style="
+                height: 100%;
+                width: 0%;
+                background: var(--grad);
+                transition: width 0.3s;
+              "
+            ></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 10px;
+            "
+          >
+            <h4 style="margin: 0" id="dailyAddTitle">Add Expense</h4>
+          </div>
+          <div
+            id="fixedContainer"
+            class="fixed-container"
+            style="display: none"
+          ></div>
+          <div class="cat-scroll" id="catList">
+            <div
+              class="cat-chip selected"
+              onclick="Daily.selectCat('Food', this)"
+            >
+              🍔 Food
+            </div>
+            <div class="cat-chip" onclick="Daily.selectCat('Travel', this)">
+              🚕 Travel
+            </div>
+            <div class="cat-chip" onclick="Daily.selectCat('Shopping', this)">
+              🛍️ Shop
+            </div>
+            <div class="cat-chip" onclick="Daily.selectCat('Bills', this)">
+              🧾 Bills
+            </div>
+            <div class="cat-chip" onclick="Daily.selectCat('Ent', this)">
+              🍿 Fun
+            </div>
+            <div class="cat-chip" onclick="Daily.selectCat('Other', this)">
+              📦 Other
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px">
+            <input
+              type="text"
+              id="dailyDesc"
+              placeholder="e.g. Burger, Metro..."
+              onkeyup="Daily.autoCat('dailyDesc')"
+              style="margin-bottom: 0"
+            />
+            <input
+              type="number"
+              id="dailyAmt"
+              placeholder="₹"
+              style="width: 30%; margin-bottom: 0"
+            />
+            <button
+              class="btn-primary"
+              id="dailyAddBtn"
+              style="width: auto; margin-bottom: 0; padding: 0 15px"
+              onclick="Daily.add()"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <h3
+          style="
+            font-size: 12px;
+            color: var(--sub);
+            text-transform: uppercase;
+            margin: 20px 0 10px;
+          "
+        >
+          History
+        </h3>
+        <div id="dailyList"></div>
+      </div>
+
+      <nav class="bottom-nav">
+        <div
+          class="nav-item active"
+          id="navItemTrips"
+          onclick="UI.switchTab('trips')"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Squad</span>
+        </div>
+        <div class="nav-item" id="navItemDaily" onclick="UI.switchTab('daily')">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+          <span>Daily</span>
+        </div>
+      </nav>
+    </div>
+
+    <div id="usernameModal" class="modal">
+      <div class="modal-content">
+        <h3>Complete Profile</h3>
+        <p style="color: var(--sub); font-size: 12px; margin-bottom: 15px">
+          Set your unique handle.
+        </p>
+        <input
+          type="text"
+          id="newUsername"
+          placeholder="@username"
+          oninput="Utils.cleanInput(this)"
+        /><button
+          class="btn btn-primary full-width-btn"
+          onclick="Auth.saveUsername(true)"
+        >
+          Start
+        </button>
+        <p
+          id="userError"
+          style="
+            color: var(--danger);
+            font-size: 12px;
+            text-align: center;
+            display: none;
+            margin-top: 10px;
+          "
+        ></p>
+      </div>
+    </div>
+
+    <div id="createTripModal" class="modal">
+      <div class="modal-content">
+        <h3>New Trip</h3>
+        <label style="font-size: 11px; color: var(--sub)">LOCATION</label
+        ><input
+          type="text"
+          id="locSearch"
+          placeholder="Where to? (e.g. Goa)"
+          onkeyup="App.searchLocation()"
+        />
+        <div id="locResults"></div>
+        <input type="hidden" id="selectedState" /><input
+          type="hidden"
+          id="selectedImage"
+        />
+        <div style="display: flex; gap: 10px; margin-top: 10px">
+          <div style="flex: 1">
+            <label style="font-size: 11px; color: var(--sub)">CURRENCY</label
+            ><select id="tripCurrency">
+              <option value="₹">INR (₹)</option>
+              <option value="$">USD ($)</option>
+              <option value="€">EUR (€)</option>
+              <option value="£">GBP (£)</option>
+              <option value="¥">JPY (¥)</option>
+            </select>
+          </div>
+        </div>
+        <label
+          style="
+            font-size: 11px;
+            color: var(--sub);
+            margin-top: 10px;
+            display: block;
+          "
+          >FRIENDS</label
+        >
+        <p style="font-size: 11px; color: var(--sub); margin-bottom: 5px">
+          Enter @username OR Name (for ghost users)
+        </p>
+        <input type="text" id="newTripUsers" placeholder="e.g. @zedd, Rahul" />
+        <div class="modal-actions">
+          <button
+            class="btn btn-outline"
+            onclick="UI.closeModal('createTripModal')"
+          >
+            Cancel</button
+          ><button class="btn btn-primary" onclick="App.createTrip()">
+            Create
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="profileModal" class="modal">
+      <div class="modal-content">
+        <h3>My Profile</h3>
+        <p style="color: var(--sub); font-size: 12px; margin-bottom: 15px">
+          Update details for friends.
+        </p>
+        <label style="font-size: 11px; color: var(--sub)">USERNAME (ID)</label
+        ><input
+          type="text"
+          id="profUsername"
+          disabled
+          placeholder="@username"
+        /><label style="font-size: 11px; color: var(--sub)">DISPLAY NAME</label
+        ><input
+          type="text"
+          id="profDisplayName"
+          placeholder="Your Name"
+        /><label style="font-size: 11px; color: var(--sub)">WHATSAPP</label
+        ><input type="number" id="profPhone" placeholder="919999999999" /><label
+          style="font-size: 11px; color: var(--sub)"
+          >UPI ID</label
+        ><input type="text" id="profUPI" placeholder="user@upi" />
+        <div class="modal-actions" style="flex-direction: column; gap: 10px">
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 10px;
+              width: 100%;
+            "
+          >
+            <button
+              class="btn btn-outline"
+              onclick="UI.closeModal('profileModal')"
+            >
+              Close</button
+            ><button class="btn btn-primary" onclick="Auth.saveProfile()">
+              Save
+            </button>
+          </div>
+          <button
+            class="btn btn-outline full-width-btn"
+            onclick="Auth.logout()"
+          >
+            Log Out</button
+          ><button
+            class="btn btn-danger full-width-btn"
+            onclick="Auth.deleteAccount()"
+          >
+            Delete Account
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="manageMembersModal" class="modal">
+      <div class="modal-content">
+        <h3>Manage Trip</h3>
+        <div
+          id="membersList"
+          style="margin-bottom: 15px; max-height: 200px; overflow-y: auto"
+        ></div>
+        <label style="font-size: 11px; color: var(--sub)">ADD NEW MEMBER</label>
+        <div style="display: flex; gap: 10px">
+          <input
+            type="text"
+            id="addMemberInput"
+            placeholder="@user or Name"
+            style="margin-bottom: 0"
+          /><button
+            class="btn btn-primary"
+            style="width: auto; margin-bottom: 0"
+            onclick="App.addMemberToTrip()"
+          >
+            Add
+          </button>
+        </div>
+        <button
+          class="btn btn-outline full-width-btn"
+          style="margin-top: 15px"
+          onclick="UI.closeModal('manageMembersModal')"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+
+    <div id="fixedModal" class="modal">
+      <div class="modal-content">
+        <h3>Recurring Expenses</h3>
+        <p style="color: var(--sub); font-size: 12px; margin-bottom: 15px">
+          Add items you pay often.
+        </p>
+        <div id="fixedListEditor" style="margin-bottom: 15px"></div>
+        <div
+          style="background: var(--input); padding: 10px; border-radius: 12px"
+        >
+          <input
+            type="text"
+            id="newFixedDesc"
+            placeholder="Name (e.g. Metro)"
+            style="margin-bottom: 8px"
+            onkeyup="Daily.autoCat('newFixedDesc')"
+          />
+          <div style="display: flex; gap: 8px">
+            <input
+              type="number"
+              id="newFixedAmt"
+              placeholder="Amount"
+              style="margin-bottom: 0"
+            /><select id="newFixedCat" style="margin-bottom: 0">
+              <option value="Travel">Travel</option>
+              <option value="Food">Food</option>
+              <option value="Shopping">Shop</option>
+              <option value="Bills">Bills</option>
+              <option value="Ent">Fun</option>
+            </select>
+          </div>
+          <button
+            class="btn btn-primary"
+            style="margin-top: 10px"
+            onclick="Daily.addFixed()"
+          >
+            Save Item
+          </button>
+        </div>
+        <button
+          class="btn btn-outline full-width-btn"
+          style="margin-top: 15px"
+          onclick="UI.closeModal('fixedModal')"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+
+    <div id="settleModal" class="modal">
+      <div class="modal-content">
+        <h3>Record Payment</h3>
+        <p
+          id="settleContext"
+          style="color: var(--sub); font-size: 13px; margin-bottom: 15px"
+        ></p>
+        <label style="font-size: 11px; color: var(--sub)">AMOUNT TO PAY</label
+        ><input type="number" id="settleAmt" /><label
+          style="font-size: 11px; color: var(--sub)"
+          >PAYMENT METHOD</label
+        ><select id="settleMethod">
+          <option value="UPI">UPI</option>
+          <option value="Cash">Cash</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+        </select>
+        <div class="modal-actions">
+          <button
+            class="btn btn-outline"
+            onclick="UI.closeModal('settleModal')"
+          >
+            Cancel</button
+          ><button class="btn btn-primary" onclick="App.confirmSettle()">
+            Record Paid
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="editTxModal" class="modal">
+      <div class="modal-content">
+        <h3>Edit Transaction</h3>
+        <input type="hidden" id="editTxId" />
+        <div style="display: flex; gap: 10px; margin-bottom: 10px">
+          <input type="text" id="editDesc" placeholder="Description" /><input
+            type="number"
+            id="editAmt"
+            placeholder="Amount"
+            style="width: 40%"
+          />
+        </div>
+        <div style="display: flex; gap: 10px; margin-bottom: 10px">
+          <select id="editPayer" style="margin-bottom: 0"></select
+          ><select id="editCategory" style="margin-bottom: 0">
+            <option value="Food">Food</option>
+            <option value="Travel">Travel</option>
+            <option value="Stay">Stay</option>
+            <option value="Fun">Fun</option>
+            <option value="Misc">Misc</option>
+          </select>
+        </div>
+        <div class="split-tabs">
+          <div
+            class="split-tab active"
+            id="editTabEq"
+            onclick="App.setEditSplit('equal')"
+          >
+            Equal
+          </div>
+          <div
+            class="split-tab"
+            id="editTabUneq"
+            onclick="App.setEditSplit('unequal')"
+          >
+            Exact
+          </div>
+        </div>
+        <div id="editAreaEq" class="pills"></div>
+        <div id="editAreaUneq" class="hidden"></div>
+        <div class="modal-actions">
+          <button
+            class="btn btn-outline"
+            onclick="UI.closeModal('editTxModal')"
+          >
+            Cancel</button
+          ><button class="btn btn-primary" onclick="App.saveEditTx()">
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="reminderModal" class="modal">
+      <div class="modal-content">
+        <h3>Send Reminder</h3>
+        <p
+          id="reminderDetails"
+          style="
+            font-size: 13px;
+            color: var(--sub);
+            margin-bottom: 15px;
+            text-align: center;
+          "
+        ></p>
+        <h4 style="font-size: 12px; margin-bottom: 10px">Select Vibe:</h4>
+        <div
+          id="jokeList"
+          style="max-height: 250px; overflow-y: auto; margin-bottom: 20px"
+        ></div>
+        <div style="text-align: center">
+          <button
+            class="btn btn-wa full-width-btn"
+            id="sendWaBtn"
+            style="padding: 15px; font-size: 16px"
+          >
+            <svg
+              width="20"
+              height="20"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+              style="margin-right: 8px"
+            >
+              <path
+                d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592z"
+              /></svg
+            >Send on WhatsApp</button
+          ><button
+            class="btn-text"
+            style="margin-top: 15px; width: 100%; justify-content: center"
+            onclick="UI.closeModal('reminderModal')"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="inviteModal" class="modal">
+      <div
+        class="modal-content"
+        style="
+          padding: 0;
+          background: transparent;
+          box-shadow: none;
+          border: none;
+        "
+      >
+        <div class="ticket-bg">
+          <div class="qr-box"><div id="qrContainer"></div></div>
+          <p
+            style="
+              font-size: 11px;
+              color: var(--text);
+              margin-top: 10px;
+              word-break: break-all;
+            "
+            id="inviteLinkText"
+          ></p>
+        </div>
+        <button
+          class="btn btn-primary full-width-btn"
+          onclick="App.copyInvite()"
+        >
+          Copy Link</button
+        ><button
+          class="btn btn-outline full-width-btn"
+          style="
+            margin-top: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+          "
+          onclick="UI.closeModal('inviteModal')"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+
+    <div id="summaryModal" class="modal">
+      <div class="modal-content">
+        <h3>Spending Stats</h3>
+        <p style="color: var(--sub); font-size: 12px; margin-bottom: 15px">
+          Who actually consumed value?
+        </p>
+        <div id="summaryList" style="max-height: 350px; overflow-y: auto"></div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="App.exportCSV()">
+            📄 CSV</button
+          ><button
+            class="btn btn-outline"
+            onclick="UI.closeModal('summaryModal')"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="pwaPopup">
+      <div class="pwa-info">
+        <div class="pwa-title">Install Splitza</div>
+        <div class="pwa-sub">Add to home screen for quick access</div>
+      </div>
+      <button
+        id="pwaInstallBtn"
+        class="btn-primary"
+        style="font-size: 12px; padding: 8px 16px"
+      >
+        Install
+      </button>
+    </div>
+
+    <script>
+      let db,
+        auth,
+        provider,
+        currentUser = null,
+        userProfile = null,
+        currentTripId = null,
+        tripsData = {},
+        usersMap = {};
+      let settleParams = {};
+      let editSplitType = "equal";
+      let tripCurrency = "₹";
+
+      const AVATAR_COLORS = [
+        "#FF6B6B",
+        "#54a0ff",
+        "#1dd1a1",
+        "#feca57",
+        "#5f27cd",
+        "#ff9ff3",
+      ];
+      function getAvatarHTML(name, photoUrl) {
+        if (photoUrl)
+          return `<div class="avatar" style="background-image:url('${photoUrl}')"></div>`;
+        const init = name ? name[0].toUpperCase() : "?";
+        const col = AVATAR_COLORS[(name?.length || 0) % AVATAR_COLORS.length];
+        return `<div class="avatar" style="background-color:${col}">${init}</div>`;
+      }
+
+      const Utils = {
+        cleanInput: (el) =>
+          (el.value = el.value.toLowerCase().replace(/[^a-z0-9_]/g, "")),
+        debounce: (func, wait) => {
+          let timeout;
+          return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func(...args), wait);
+          };
+        },
+        resolveMember: (id) => {
+          if (id === currentUser.uid)
+            return {
+              displayName: userProfile?.displayName || "Me",
+              photo: userProfile?.photo || "",
+            };
+          if (usersMap[id]) return usersMap[id];
+          if (
+            currentTripId &&
+            tripsData[currentTripId].members[id] &&
+            typeof tripsData[currentTripId].members[id] === "string"
+          )
+            return {
+              displayName: tripsData[currentTripId].members[id],
+              username: "guest",
+              photo: "",
+            };
+          return { displayName: "Unknown", username: "unknown", photo: "" };
+        },
+        jokes: [
+          { id: 1, text: "Hey, just clearing bills. Please pay." },
+          { id: 2, text: "Hi! Hope you're good. Can you settle this?" },
+          { id: 3, text: "Pay up or I'm telling your mom." },
+          { id: 4, text: "My wallet is crying. Feed it." },
+          { id: 5, text: "Accepting cash, UPI, or kidneys." },
+          { id: 6, text: "Inflation is real, help a bro out." },
+          { id: 7, text: "I know where you live... (JK, pay me)." },
+        ],
+      };
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const inviteId = urlParams.get("invite");
+      if (inviteId) {
+        sessionStorage.setItem("pendingInvite", inviteId);
+        document.getElementById("inviteAlert").style.display = "block";
+      }
+
+      setTimeout(() => {
+        const loader = document.getElementById("appLoader");
+        if (loader && loader.style.display !== "none") {
+          loader.style.display = "none";
+          if (!currentUser)
+            document.getElementById("landingView").classList.remove("hidden");
+        }
+      }, 8000);
+
+      window.addEventListener("firebaseLoaded", () => {
+        db = window.FB.db;
+        auth = window.FB.auth;
+        provider = window.FB.provider;
+        window.FB.onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            currentUser = user;
+            await checkUserSetup(user);
+          } else {
+            document.getElementById("appLoader").style.display = "none";
+            document.getElementById("landingView").classList.remove("hidden");
+            document.getElementById("mainView").classList.add("hidden");
+          }
+        });
+      });
+
+      const Auth = {
+        login: () =>
+          window.FB.signInWithPopup(auth, provider).catch((e) =>
+            alert("Login failed: " + e.message)
+          ),
+        logout: () => {
+          window.FB.signOut(auth);
+          location.reload();
+        },
+        saveProfile: async () => {
+          const displayName = document
+            .getElementById("profDisplayName")
+            .value.trim();
+          const phone = document.getElementById("profPhone").value.trim();
+          const upi = document.getElementById("profUPI").value.trim();
+          if (!displayName) return alert("Display Name is required");
+          await window.FB.update(window.FB.ref(db), {
+            [`users/${currentUser.uid}/displayName`]: displayName,
+            [`users/${currentUser.uid}/phone`]: phone,
+            [`users/${currentUser.uid}/upi`]: upi,
+          });
+          userProfile.displayName = displayName;
+          userProfile.phone = phone;
+          userProfile.upi = upi;
+          UI.closeModal("profileModal");
+          initApp(userProfile);
+        },
+        saveUsername: async (isNew) => {
+          const username = document.getElementById("newUsername").value.trim();
+          if (username.length < 3) return alert("Username too short");
+          const snap = await window.FB.get(
+            window.FB.ref(db, `usernames/${username}`)
+          );
+          if (snap.exists()) {
+            document.getElementById("userError").innerText = "Username taken!";
+            document.getElementById("userError").style.display = "block";
+            return;
+          }
+          const profile = {
+            username,
+            email: currentUser.email,
+            photo: currentUser.photoURL || "",
+            uid: currentUser.uid,
+            displayName: currentUser.displayName || username,
+            phone: "",
+            upi: "",
+          };
+          await window.FB.update(window.FB.ref(db), {
+            [`users/${currentUser.uid}`]: profile,
+            [`usernames/${username}`]: currentUser.uid,
+          });
+          userProfile = profile;
+          const pending = sessionStorage.getItem("pendingInvite");
+          if (pending) {
+            await window.FB.update(
+              window.FB.ref(db, `trips/${pending}/members`),
+              { [currentUser.uid]: true }
+            );
+            sessionStorage.removeItem("pendingInvite");
+          }
+          UI.closeModal("usernameModal");
+          initApp(profile);
+        },
+        deleteAccount: async () => {
+          if (!confirm("WARNING: Delete account permanently?")) return;
+          await window.FB.remove(window.FB.ref(db, `users/${currentUser.uid}`));
+          await window.FB.remove(
+            window.FB.ref(db, `usernames/${userProfile.username}`)
+          );
+          await window.FB.deleteUser(currentUser);
+          location.reload();
+        },
+      };
+
+      async function checkUserSetup(user) {
+        const snap = await window.FB.get(
+          window.FB.ref(db, `users/${user.uid}`)
+        );
+        if (!snap.exists()) {
+          document.getElementById("appLoader").style.display = "none";
+          document.getElementById("landingView").classList.add("hidden");
+          document.getElementById("newUsername").value = user.email
+            .split("@")[0]
+            .replace(/[^a-z0-9]/g, "");
+          UI.openModal("usernameModal");
+        } else {
+          userProfile = snap.val();
+          const pending = sessionStorage.getItem("pendingInvite");
+          if (pending) {
+            await window.FB.update(
+              window.FB.ref(db, `trips/${pending}/members`),
+              { [user.uid]: true }
+            );
+            sessionStorage.removeItem("pendingInvite");
+            alert("Joined trip!");
+          }
+          initApp(userProfile);
+        }
+      }
+
+      function initApp(profile) {
+        document.getElementById("appLoader").style.display = "none";
+        document.getElementById("landingView").classList.add("hidden");
+        document.getElementById("mainView").classList.remove("hidden");
+        document.getElementById("myHandle").innerText =
+          profile.displayName || profile.username;
+        document.getElementById("myAvatar").innerHTML = getAvatarHTML(
+          profile.displayName,
+          profile.photo
+        );
+        document.getElementById("profUsername").value = profile.username || "";
+        document.getElementById("profDisplayName").value =
+          profile.displayName || "";
+        document.getElementById("profPhone").value = profile.phone || "";
+        document.getElementById("profUPI").value = profile.upi || "";
+
+        // KEY FIX: When users load, refresh trips AND current trip
+        window.FB.onValue(window.FB.ref(db, "users"), (snap) => {
+          usersMap = snap.val() || {};
+          App.renderTrips();
+          if (currentTripId) App.loadTrip(currentTripId);
+        });
+
+        window.FB.onValue(window.FB.ref(db, "trips"), (snap) => {
+          tripsData = snap.val() || {};
+          App.renderTrips();
+          App.calcGlobal();
+          if (currentTripId) App.loadTrip(currentTripId);
+        });
+        Daily.init();
+      }
+
+      const Daily = {
+        data: {},
+        limit: 2000,
+        fixedItems: {},
+        selectedDate: new Date().toISOString().split("T")[0],
+        selectedCat: "Food",
+        editMode: null,
+        keywords: {
+          Food: [
+            "burger",
+            "kfc",
+            "pizza",
+            "lunch",
+            "dinner",
+            "breakfast",
+            "coffee",
+            "tea",
+            "swiggy",
+            "zomato",
+            "cafe",
+            "snack",
+            "drink",
+          ],
+          Travel: [
+            "cab",
+            "uber",
+            "ola",
+            "auto",
+            "metro",
+            "train",
+            "bus",
+            "fuel",
+            "petrol",
+            "parking",
+            "flight",
+            "ticket",
+            "driver",
+          ],
+          Shopping: [
+            "clothes",
+            "shoes",
+            "amazon",
+            "flipkart",
+            "myntra",
+            "mall",
+            "mart",
+          ],
+          Bills: [
+            "rent",
+            "electricity",
+            "wifi",
+            "recharge",
+            "mobile",
+            "gas",
+            "water",
+          ],
+          Ent: ["movie", "netflix", "game", "spotify", "prime", "cinema"],
+        },
+
+        init: () => {
+          if (!currentUser) return;
+          window.FB.onValue(
+            window.FB.ref(db, `users/${currentUser.uid}/settings/dailyLimit`),
+            (s) => {
+              if (s.val()) Daily.limit = s.val();
+              Daily.renderAll();
+            }
+          );
+          window.FB.onValue(
+            window.FB.ref(db, `users/${currentUser.uid}/settings/fixedItems`),
+            (s) => {
+              Daily.fixedItems = s.val() || {};
+              Daily.renderFixed();
+            }
+          );
+          window.FB.onValue(
+            window.FB.ref(db, `users/${currentUser.uid}/personal`),
+            (snap) => {
+              Daily.data = snap.val() || {};
+              Daily.renderAll();
+            }
+          );
+        },
+        renderAll: () => {
+          Daily.renderCalendar();
+          Daily.renderList();
+        },
+        toggleCalendar: () => {
+          const el = document.getElementById("calSection");
+          el.classList.toggle("expanded");
+          document.getElementById("btnCal").classList.toggle("active");
+        },
+        toggleStats: () => {
+          const el = document.getElementById("statsSection");
+          el.classList.toggle("expanded");
+          document.getElementById("btnStats").classList.toggle("active");
+        },
+        autoCat: (inputId) => {
+          const txt = document.getElementById(inputId).value.toLowerCase();
+          let found = null;
+          for (const [cat, words] of Object.entries(Daily.keywords)) {
+            if (words.some((w) => txt.includes(w))) {
+              found = cat;
+              break;
+            }
+          }
+          if (inputId === "dailyDesc") {
+            if (found)
+              Daily.selectCat(
+                found,
+                document.querySelector(`.cat-chip[onclick*="${found}"]`)
+              );
+          } else if (inputId === "newFixedDesc") {
+            if (found) document.getElementById("newFixedCat").value = found;
+          }
+        },
+        selectCat: (cat, el) => {
+          Daily.selectedCat = cat;
+          document
+            .querySelectorAll(".cat-chip")
+            .forEach((c) => c.classList.remove("selected"));
+          if (el) el.classList.add("selected");
+        },
+        selectDate: (dateStr) => {
+          Daily.selectedDate = dateStr;
+          Daily.editMode = null;
+          Daily.resetForm();
+          Daily.renderAll();
+        },
+
+        // Fixed Items
+        addFixed: () => {
+          const desc = document.getElementById("newFixedDesc").value;
+          const amt = parseFloat(document.getElementById("newFixedAmt").value);
+          const cat = document.getElementById("newFixedCat").value;
+          if (!desc || !amt) return;
+          window.FB.push(
+            window.FB.ref(db, `users/${currentUser.uid}/settings/fixedItems`),
+            { desc, amt, cat }
+          );
+          document.getElementById("newFixedDesc").value = "";
+          document.getElementById("newFixedAmt").value = "";
+          Daily.renderFixed();
+        },
+        removeFixed: (id) => {
+          if (confirm("Remove recurring item?"))
+            window.FB.remove(
+              window.FB.ref(
+                db,
+                `users/${currentUser.uid}/settings/fixedItems/${id}`
+              )
+            );
+        },
+        fillFromFixed: (desc, amt, cat) => {
+          document.getElementById("dailyDesc").value = desc;
+          document.getElementById("dailyAmt").value = amt;
+          const chip = document.querySelector(`.cat-chip[onclick*="${cat}"]`);
+          if (chip) Daily.selectCat(cat, chip);
+        },
+        renderFixed: () => {
+          const container = document.getElementById("fixedContainer");
+          const listEditor = document.getElementById("fixedListEditor");
+          container.innerHTML = "";
+          listEditor.innerHTML = "";
+          if (Object.keys(Daily.fixedItems).length > 0)
+            container.style.display = "flex";
+          else container.style.display = "none";
+          Object.entries(Daily.fixedItems).forEach(([id, item]) => {
+            container.innerHTML += `<div class="fixed-chip" onclick="Daily.fillFromFixed('${item.desc}', ${item.amt}, '${item.cat}')"><span>${item.desc}</span> <b>₹${item.amt}</b></div>`;
+            listEditor.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid var(--border);"><span>${item.desc} (₹${item.amt})</span><span style="color:var(--danger); cursor:pointer;" onclick="Daily.removeFixed('${id}')">&times;</span></div>`;
+          });
+        },
+
+        // CRUD
+        add: () => {
+          const desc = document.getElementById("dailyDesc").value;
+          const amt = parseFloat(document.getElementById("dailyAmt").value);
+          if (!desc || !amt) return;
+          if (Daily.editMode) {
+            window.FB.update(
+              window.FB.ref(
+                db,
+                `users/${currentUser.uid}/personal/${Daily.selectedDate}/${Daily.editMode}`
+              ),
+              { desc, amt, cat: Daily.selectedCat }
+            );
+            Daily.editMode = null;
+          } else {
+            window.FB.set(
+              window.FB.push(
+                window.FB.ref(
+                  db,
+                  `users/${currentUser.uid}/personal/${Daily.selectedDate}`
+                )
+              ),
+              { desc, amt, cat: Daily.selectedCat, date: Date.now() }
+            );
+          }
+          Daily.resetForm();
+        },
+        startEdit: (id, desc, amt, cat) => {
+          Daily.editMode = id;
+          document.getElementById("dailyDesc").value = desc;
+          document.getElementById("dailyAmt").value = amt;
+          const chip = document.querySelector(`.cat-chip[onclick*="${cat}"]`);
+          if (chip) Daily.selectCat(cat, chip);
+          const btn = document.getElementById("dailyAddBtn");
+          btn.innerText = "✓";
+          btn.style.background = "var(--warn)";
+          document.getElementById("dailyAddTitle").innerText = "Edit Expense";
+        },
+        delete: (id) => {
+          if (confirm("Delete?"))
+            window.FB.remove(
+              window.FB.ref(
+                db,
+                `users/${currentUser.uid}/personal/${Daily.selectedDate}/${id}`
+              )
+            );
+        },
+        resetForm: () => {
+          document.getElementById("dailyDesc").value = "";
+          document.getElementById("dailyAmt").value = "";
+          const btn = document.getElementById("dailyAddBtn");
+          btn.innerText = "+";
+          btn.style.background = "var(--grad)";
+          document.getElementById("dailyAddTitle").innerText = "Add Expense";
+        },
+        editLimit: () => {
+          const n = prompt("Daily Limit:", Daily.limit);
+          if (n)
+            window.FB.set(
+              window.FB.ref(db, `users/${currentUser.uid}/settings/dailyLimit`),
+              parseFloat(n)
+            );
+        },
+
+        // Calendar & List Render
+        renderCalendar: () => {
+          const grid = document.getElementById("calendarContainer");
+          grid.innerHTML = "";
+          const d = new Date(Daily.selectedDate);
+          const y = d.getFullYear(),
+            m = d.getMonth();
+          const mNames = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ];
+          document.getElementById("currentMonthDisplay").innerText = mNames[m];
+          let mTotal = 0;
+          const daysInM = new Date(y, m + 1, 0).getDate();
+          const startD = new Date(y, m, 1).getDay();
+          const heads = ["S", "M", "T", "W", "T", "F", "S"];
+          heads.forEach(
+            (h) =>
+              (grid.innerHTML += `<div style="font-size:10px; color:var(--sub); margin-bottom:5px;">${h}</div>`)
+          );
+          for (let i = 0; i < startD; i++) grid.innerHTML += `<div></div>`;
+          for (let i = 1; i <= daysInM; i++) {
+            const ds = `${y}-${String(m + 1).padStart(2, "0")}-${String(
+              i
+            ).padStart(2, "0")}`;
+            let s = 0;
+            if (Daily.data[ds])
+              Object.values(Daily.data[ds]).forEach((x) => (s += x.amt));
+            if (ds.startsWith(`${y}-${String(m + 1).padStart(2, "0")}`))
+              mTotal += s;
+            let c = "cal-day";
+            if (ds === Daily.selectedDate) c += " active";
+            if (s > 0) {
+              const ratio = s / Daily.limit;
+              if (ratio > 1) c += " bad";
+              else if (ratio > 0.5) c += " warn";
+              else c += " good";
+            }
+            grid.innerHTML += `<div class="${c}" onclick="Daily.selectDate('${ds}')">${i}</div>`;
+          }
+          document.getElementById(
+            "monthTotalDisplay"
+          ).innerText = `₹${mTotal.toLocaleString()}`;
+        },
+        renderList: () => {
+          const list = document.getElementById("dailyList");
+          list.innerHTML = "";
+          const dd = Daily.data[Daily.selectedDate] || {};
+          let total = 0;
+          const isToday =
+            Daily.selectedDate === new Date().toISOString().split("T")[0];
+          document.getElementById("selectedDateDisplay").innerText = isToday
+            ? "Today"
+            : Daily.selectedDate;
+          Object.entries(dd)
+            .reverse()
+            .forEach(([id, i]) => {
+              total += i.amt;
+              const icon =
+                {
+                  Travel: "🚕",
+                  Shopping: "🛍️",
+                  Bills: "🧾",
+                  Ent: "🍿",
+                  Other: "📦",
+                }[i.cat] || "🍔";
+              list.innerHTML += `<div class="daily-item"><div><span class="daily-cat">${icon} ${i.cat}</span><b>${i.desc}</b></div><div style="display:flex; align-items:center; gap:10px;"><b>₹${i.amt}</b><span onclick="Daily.startEdit('${id}', '${i.desc}', ${i.amt}, '${i.cat}')" style="cursor:pointer; font-size:14px; color:var(--sub);">✎</span><span onclick="Daily.delete('${id}')" style="color:var(--danger);cursor:pointer; font-size:18px;">&times;</span></div></div>`;
+            });
+          document.getElementById("daySpent").innerText = `₹${total}`;
+          document.getElementById("dayLimit").innerText = `₹${Daily.limit}`;
+          const pct = (total / Daily.limit) * 100;
+          const bar = document.getElementById("dayProgressBar");
+          bar.style.width = `${Math.min(pct, 100)}%`;
+          if (pct > 100) bar.style.background = "var(--danger)";
+          else if (pct > 50) bar.style.background = "var(--warn)";
+          else bar.style.background = "var(--grad)";
+        },
+        filterRange: () => {
+          const start = document.getElementById("rangeStart").value;
+          const end = document.getElementById("rangeEnd").value;
+          if (!start || !end) return alert("Select start and end dates");
+          let sum = 0;
+          const sTime = new Date(start).getTime();
+          const eTime = new Date(end).getTime();
+          Object.entries(Daily.data).forEach(([date, items]) => {
+            const dTime = new Date(date).getTime();
+            if (dTime >= sTime && dTime <= eTime) {
+              Object.values(items).forEach((i) => (sum += i.amt));
+            }
+          });
+          document.getElementById(
+            "rangeTotal"
+          ).innerText = `₹${sum.toLocaleString()}`;
+        },
+        exportRange: () => {
+          const start = document.getElementById("rangeStart").value;
+          const end = document.getElementById("rangeEnd").value;
+          if (!start || !end) return alert("Select start and end dates");
+          let csv = "Date,Description,Category,Amount\n";
+          const sTime = new Date(start).getTime();
+          const eTime = new Date(end).getTime();
+          Object.entries(Daily.data).forEach(([date, items]) => {
+            const dTime = new Date(date).getTime();
+            if (dTime >= sTime && dTime <= eTime) {
+              Object.values(items).forEach((i) => {
+                csv += `${date},${i.desc},${i.cat},${i.amt}\n`;
+              });
+            }
+          });
+          const link = document.createElement("a");
+          link.href = "data:text/csv;charset=utf-8," + encodeURI(csv);
+          link.download = `expenses_${start}_to_${end}.csv`;
+          document.body.appendChild(link);
+          link.click();
+        },
+      };
+
+      const App = {
+        splitType: "equal",
+        searchLocation: Utils.debounce(async () => {
+          const query = document.getElementById("locSearch").value;
+          if (query.length < 3) return;
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${query}&addressdetails=1&limit=5`
+          );
+          const data = await res.json();
+          const resDiv = document.getElementById("locResults");
+          resDiv.innerHTML = "";
+          resDiv.style.display = "block";
+          data.forEach((place) => {
+            const city = place.address.city || place.address.town || place.name;
+            const state = place.address.state || place.address.country;
+            const div = document.createElement("div");
+            div.className = "loc-item";
+            div.innerText = `${city}, ${state}`;
+            div.onclick = () => {
+              document.getElementById("locSearch").value = city;
+              document.getElementById("selectedState").value = state;
+              document.getElementById(
+                "selectedImage"
+              ).value = `https://image.pollinations.ai/prompt/scenic%20view%20of%20${city}%20${state}%20travel%20wallpaper?width=800&height=400&nologo=true`;
+              resDiv.style.display = "none";
+            };
+            resDiv.appendChild(div);
+          });
+        }, 500),
+        createTrip: async () => {
+          const name = document.getElementById("locSearch").value;
+          const state = document.getElementById("selectedState").value || "";
+          const img = document.getElementById("selectedImage").value || "";
+          const userStr = document.getElementById("newTripUsers").value;
+          const currency = document.getElementById("tripCurrency").value;
+          if (!name) return alert("Select a location");
+          const members = { [currentUser.uid]: true };
+          if (userStr)
+            userStr.split(",").forEach((s) => {
+              const t = s.trim();
+              if (t.length > 0)
+                members[
+                  `ghost_${Date.now()}_${Math.random()
+                    .toString(36)
+                    .substr(2, 5)}`
+                ] = t;
+            });
+          await window.FB.set(window.FB.push(window.FB.ref(db, "trips")), {
+            name,
+            state,
+            banner: img,
+            currency,
+            members,
+            createdBy: currentUser.uid,
+            created: Date.now(),
+          });
+          UI.closeModal("createTripModal");
+        },
+        shareTrip: () => {
+          const url = `${location.origin}${location.pathname}?invite=${currentTripId}`;
+          document.getElementById(
+            "qrContainer"
+          ).innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+            url
+          )}" style="display:block;margin:0 auto;">`;
+          document.getElementById("inviteLinkText").innerText = url;
+          UI.openModal("inviteModal");
+        },
+        copyInvite: () =>
+          navigator.clipboard
+            .writeText(document.getElementById("inviteLinkText").innerText)
+            .then(() => alert("Copied!")),
+        openManageMembers: () => {
+          const t = tripsData[currentTripId];
+          const l = document.getElementById("membersList");
+          l.innerHTML = "";
+          if (t && t.members)
+            Object.keys(t.members).forEach((uid) => {
+              const u = Utils.resolveMember(uid);
+              const isCreator = t.createdBy === currentUser.uid;
+              const isMe = uid === currentUser.uid;
+              let action = "";
+              if (isCreator && !isMe)
+                action = `<span class="remove-icon" onclick="App.removeMember('${uid}')">&times;</span>`;
+              l.innerHTML += `<div class="member-list-item"><div class="member-info">${getAvatarHTML(
+                u.displayName,
+                u.photo
+              )}<div>${u.displayName}</div></div>${action}</div>`;
+            });
+          UI.openModal("manageMembersModal");
+        },
+        addMemberToTrip: async () => {
+          const val = document.getElementById("addMemberInput").value.trim();
+          if (!val) return;
+          const uid = `ghost_${Date.now()}`;
+          await window.FB.update(
+            window.FB.ref(db, `trips/${currentTripId}/members`),
+            { [uid]: val }
+          );
+          document.getElementById("addMemberInput").value = "";
+          App.openManageMembers();
+        },
+        removeMember: async (uid) => {
+          if (confirm("Remove?")) {
+            await window.FB.remove(
+              window.FB.ref(db, `trips/${currentTripId}/members/${uid}`)
+            );
+            App.openManageMembers();
+          }
+        },
+        deleteTrip: () => {
+          if (confirm("Permanently delete?")) {
+            window.FB.remove(window.FB.ref(db, `trips/${currentTripId}`));
+            App.goHome();
+          }
+        },
+        leaveTrip: () => {
+          if (confirm("Leave trip?")) {
+            window.FB.remove(
+              window.FB.ref(
+                db,
+                `trips/${currentTripId}/members/${currentUser.uid}`
+              )
+            );
+            App.goHome();
+          }
+        },
+        loadTrip: (id) => {
+          currentTripId = id;
+          const t = tripsData[id];
+          if (!t) return;
+          if (!t.members) t.members = { [currentUser.uid]: true };
+          tripCurrency = t.currency || "₹";
+          document.getElementById("homeTab").classList.add("hidden");
+          document.getElementById("tripTab").classList.remove("hidden");
+          App.handleNav("back");
+          document.getElementById("tripTitle").innerText = t.name;
+          document.getElementById("tripLocState").innerText = t.state || "Trip";
+          document.getElementById("tripMemberCount").innerText = Object.keys(
+            t.members
+          ).length;
+          document.getElementById("amt").placeholder = `${tripCurrency} Amount`;
+          document.getElementById("tripBanner").style.backgroundImage = t.banner
+            ? `url('${t.banner}')`
+            : "none";
+          const btnContainer = document.getElementById("deleteBtnContainer");
+          if (t.createdBy === currentUser.uid)
+            btnContainer.innerHTML = `<div class="action-btn danger" onclick="App.deleteTrip()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete</div>`;
+          else
+            btnContainer.innerHTML = `<div class="action-btn" onclick="App.leaveTrip()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Exit</div>`;
+          const p = document.getElementById("payer");
+          const eq = document.getElementById("areaEq");
+          const uq = document.getElementById("areaUneq");
+          if (document.activeElement !== document.getElementById("desc")) {
+            p.innerHTML = "";
+            eq.innerHTML = "";
+            uq.innerHTML = "";
+            Object.keys(t.members).forEach((uid) => {
+              const u = Utils.resolveMember(uid);
+              p.innerHTML += `<option value="${uid}" ${
+                uid === currentUser.uid ? "selected" : ""
+              }>${u.displayName}</option>`;
+              eq.innerHTML += `<div class="pill-check"><input type="checkbox" id="chk_${uid}" value="${uid}" checked><label for="chk_${uid}">${u.displayName}</label></div>`;
+              uq.innerHTML += `<div class="uneq-row"><span>${u.displayName}</span><input type="number" class="uneq-inp" data-uid="${uid}" placeholder="${tripCurrency} 0"></div>`;
+            });
+          }
+          App.setSplit("equal");
+          App.renderStats(t);
+        },
+        setSplit: (t) => {
+          App.splitType = t;
+          document.getElementById("tabEq").className =
+            t == "equal" ? "split-tab active" : "split-tab";
+          document.getElementById("tabUneq").className =
+            t == "unequal" ? "split-tab active" : "split-tab";
+          document.getElementById("areaEq").className =
+            t == "equal" ? "pills" : "hidden";
+          document.getElementById("areaUneq").className =
+            t == "unequal" ? "" : "hidden";
+        },
+        setEditSplit: (t) => {
+          editSplitType = t;
+          document.getElementById("editTabEq").className =
+            t == "equal" ? "split-tab active" : "split-tab";
+          document.getElementById("editTabUneq").className =
+            t == "unequal" ? "split-tab active" : "split-tab";
+          document.getElementById("editAreaEq").className =
+            t == "equal" ? "pills" : "hidden";
+          document.getElementById("editAreaUneq").className =
+            t == "unequal" ? "" : "hidden";
+        },
+        addTx: () => {
+          const desc = document.getElementById("desc").value,
+            amt = parseFloat(document.getElementById("amt").value),
+            payer = document.getElementById("payer").value,
+            cat = document.getElementById("category").value;
+          if (!desc || !amt) return alert("Fill details");
+          let split = {};
+          if (App.splitType == "equal") {
+            const uids = Array.from(
+              document.querySelectorAll("#areaEq input:checked")
+            ).map((c) => c.value);
+            if (!uids.length) return alert("Select members");
+            split = { type: "equal", members: uids };
+          } else {
+            const d = {};
+            let s = 0;
+            document.querySelectorAll(".uneq-inp").forEach((i) => {
+              const v = parseFloat(i.value) || 0;
+              if (v > 0) d[i.dataset.uid] = v;
+              s += v;
+            });
+            if (Math.abs(s - amt) > 1)
+              return alert(`Check math. Sum:${s}, Total:${amt}`);
+            split = { type: "unequal", details: d };
+          }
+          window.FB.set(
+            window.FB.push(window.FB.ref(db, `trips/${currentTripId}/txs`)),
+            { desc, amt, payer, cat, ...split, date: Date.now() }
+          );
+          document.getElementById("desc").value = "";
+          document.getElementById("amt").value = "";
+        },
+        openEditTx: (txId, tx) => {
+          document.getElementById("editTxId").value = txId;
+          document.getElementById("editDesc").value = tx.desc;
+          document.getElementById("editAmt").value = tx.amt;
+          document.getElementById("editCategory").value = tx.cat || "Misc";
+          const p = document.getElementById("editPayer");
+          const eq = document.getElementById("editAreaEq");
+          const uq = document.getElementById("editAreaUneq");
+          const trip = tripsData[currentTripId];
+          p.innerHTML = "";
+          eq.innerHTML = "";
+          uq.innerHTML = "";
+          Object.keys(trip.members).forEach((uid) => {
+            const u = Utils.resolveMember(uid);
+            const opt = document.createElement("option");
+            opt.value = uid;
+            opt.innerText = u.displayName;
+            if (uid === tx.payer) opt.selected = true;
+            p.appendChild(opt);
+            const isChk =
+              tx.type === "equal" && tx.members && tx.members.includes(uid);
+            eq.innerHTML += `<div class="pill-check"><input type="checkbox" id="edit_chk_${uid}" value="${uid}" ${
+              isChk ? "checked" : ""
+            }><label for="edit_chk_${uid}">${u.displayName}</label></div>`;
+            const val =
+              tx.type === "unequal" && tx.details && tx.details[uid]
+                ? tx.details[uid]
+                : 0;
+            uq.innerHTML += `<div class="uneq-row"><span>${u.displayName}</span><input type="number" class="uneq-inp edit-uneq-inp" data-uid="${uid}" value="${val}"></div>`;
+          });
+          App.setEditSplit(tx.type || "equal");
+          UI.openModal("editTxModal");
+        },
+        saveEditTx: () => {
+          const txId = document.getElementById("editTxId").value;
+          const desc = document.getElementById("editDesc").value;
+          const amt = parseFloat(document.getElementById("editAmt").value);
+          const payer = document.getElementById("editPayer").value;
+          const cat = document.getElementById("editCategory").value;
+          if (!desc || !amt) return alert("Invalid details");
+          let split = {};
+          if (editSplitType === "equal") {
+            const uids = Array.from(
+              document.querySelectorAll("#editAreaEq input:checked")
+            ).map((c) => c.value);
+            if (!uids.length) return alert("Select members");
+            split = { type: "equal", members: uids };
+          } else {
+            const d = {};
+            let s = 0;
+            document.querySelectorAll(".edit-uneq-inp").forEach((i) => {
+              const v = parseFloat(i.value) || 0;
+              if (v > 0) d[i.dataset.uid] = v;
+              s += v;
+            });
+            if (Math.abs(s - amt) > 1)
+              return alert(`Check Math. Sum:${s}, Total:${amt}`);
+            split = { type: "unequal", details: d };
+          }
+          const updates = {};
+          updates[`trips/${currentTripId}/txs/${txId}`] = {
+            desc,
+            amt,
+            payer,
+            cat,
+            ...split,
+            date: tripsData[currentTripId].txs[txId].date,
+          };
+          window.FB.update(window.FB.ref(db), updates);
+          UI.closeModal("editTxModal");
+        },
+        renderStats: (t) => {
+          const bal = {};
+          Object.keys(t.members).forEach((u) => (bal[u] = 0));
+          const txs = t.txs ? Object.entries(t.txs).reverse() : [];
+          txs.forEach(([id, x]) => {
+            if (bal[x.payer] !== undefined) bal[x.payer] += x.amt;
+            if (x.type == "equal")
+              x.members.forEach((m) => (bal[m] -= x.amt / x.members.length));
+            else Object.entries(x.details).forEach(([m, a]) => (bal[m] -= a));
+          });
+          const term = document.getElementById("txSearch").value.toLowerCase();
+          document.getElementById("history").innerHTML = txs
+            .filter(([i, x]) => {
+              const u = Utils.resolveMember(x.payer);
+              return (x.desc + " " + (x.cat || "") + " " + u.displayName)
+                .toLowerCase()
+                .includes(term);
+            })
+            .map(([id, x]) => {
+              const isSettle = x.desc === "Settlement";
+              const u = Utils.resolveMember(x.payer);
+              const txJson = JSON.stringify(x).replace(/"/g, "&quot;");
+              return `<div class="tx-item"><div style="display:flex;align-items:center;gap:10px;">${getAvatarHTML(
+                u.displayName,
+                u.photo
+              )}<div><div style="font-weight:600;">${
+                x.desc
+              }</div><div style="font-size:11px;color:var(--sub);">${
+                isSettle
+                  ? "Settled"
+                  : new Date(x.date).toLocaleDateString() +
+                    " • " +
+                    (x.cat || "Gen")
+              }</div></div></div><div style="display:flex;align-items:center;gap:10px;"><div style="font-weight:700;color:${
+                isSettle ? "var(--accent)" : "var(--text)"
+              }">${tripCurrency}${
+                x.amt
+              }</div><div style="color:var(--sub);cursor:pointer;font-size:16px;" onclick='App.openEditTx("${id}", ${txJson})'>✎</div><div style="color:var(--danger);cursor:pointer;font-size:18px;" onclick="App.deleteTx('${id}')">&times;</div></div></div>`;
+            })
+            .join("");
+          const d = [],
+            c = [];
+          Object.entries(bal).forEach(([u, v]) => {
+            if (v < -0.1) d.push({ uid: u, amt: v });
+            if (v > 0.1) c.push({ uid: u, amt: v });
+          });
+          d.sort((a, b) => a.amt - b.amt);
+          c.sort((a, b) => b.amt - a.amt);
+          const setDiv = document.getElementById("settlements");
+          setDiv.innerHTML = "";
+          let i = 0,
+            j = 0;
+          while (i < d.length && j < c.length) {
+            let dm = d[i],
+              cm = c[j],
+              amt = Math.min(Math.abs(dm.amt), cm.amt);
+            const dName = Utils.resolveMember(dm.uid).displayName;
+            const cName = Utils.resolveMember(cm.uid).displayName;
+            setDiv.innerHTML += `<div class="settle-card"><div style="display:flex;align-items:center;gap:8px;">${getAvatarHTML(
+              dName,
+              ""
+            )}<div><div style="font-size:13px;"><b>${dName}</b></div><div style="font-size:11px;color:var(--sub);">owes ${cName}</div><div style="font-size:16px;font-weight:700;color:var(--accent);">${tripCurrency}${amt.toFixed(
+              0
+            )}</div></div></div><div class="settle-actions"><button class="btn-remind" onclick="App.openReminder('${dName}','${cName}',${amt},'${
+              dm.uid
+            }','${
+              cm.uid
+            }')">🔔</button><button class="btn-paid" onclick="App.openSettle('${
+              dm.uid
+            }','${
+              cm.uid
+            }',${amt},'${dName}','${cName}')">Paid</button></div></div>`;
+            dm.amt += amt;
+            cm.amt -= amt;
+            if (Math.abs(dm.amt) < 0.1) i++;
+            if (cm.amt < 0.1) j++;
+          }
+        },
+        deleteTx: (txId) => {
+          if (confirm("Delete?"))
+            window.FB.remove(
+              window.FB.ref(db, `trips/${currentTripId}/txs/${txId}`)
+            );
+        },
+        openSettle: (f, t, a, fn, tn) => {
+          settleParams = { from: f, to: t };
+          document.getElementById(
+            "settleContext"
+          ).innerText = `${fn} paying ${tn}`;
+          document.getElementById("settleAmt").value = a.toFixed(0);
+          UI.openModal("settleModal");
+        },
+        confirmSettle: () => {
+          const amt = parseFloat(document.getElementById("settleAmt").value);
+          const method = document.getElementById("settleMethod").value;
+          if (!amt || amt <= 0) return alert("Invalid amount");
+          window.FB.set(
+            window.FB.push(window.FB.ref(db, `trips/${currentTripId}/txs`)),
+            {
+              desc: "Settlement",
+              amt,
+              payer: settleParams.from,
+              cat: `Settled via ${method}`,
+              type: "unequal",
+              details: { [settleParams.to]: amt },
+              date: Date.now(),
+            }
+          );
+          UI.closeModal("settleModal");
+        },
+        openReminder: (dName, cName, amt, dUid, cUid) => {
+          const dobj = Utils.resolveMember(dUid);
+          const cobj = Utils.resolveMember(cUid);
+          if (dobj.username !== "guest" && !dobj.phone)
+            return alert(`${dName} hasn't added a WhatsApp number!`);
+          document.getElementById(
+            "reminderDetails"
+          ).innerText = `${dName} owes ${cName} ${tripCurrency}${amt.toFixed(
+            0
+          )}`;
+          const list = document.getElementById("jokeList");
+          list.innerHTML = "";
+          Utils.jokes.forEach(
+            (j, idx) =>
+              (list.innerHTML += `<label class="joke-opt"><input type="radio" name="jokeSel" value="${
+                j.id
+              }" ${idx === 0 ? "checked" : ""}> <span class="joke-text">${
+                j.text
+              }</span></label>`)
+          );
+          document.getElementById("sendWaBtn").onclick = () => {
+            const joke = Utils.jokes.find(
+              (j) =>
+                j.id ==
+                document.querySelector('input[name="jokeSel"]:checked').value
+            ).text;
+            const upi = cobj.upi ? `UPI: ${cobj.upi}` : "(Ask for UPI)";
+            const msg = `Yo ${dName}! You owe ${cName} ${tripCurrency}${amt.toFixed(
+              0
+            )}. ${upi}. ${joke}`;
+            const ph = dobj.phone
+              ? dobj.phone.replace(/\+/g, "").replace(/\s/g, "")
+              : "";
+            window.location.href = ph
+              ? `https://wa.me/91${ph}?text=${encodeURIComponent(msg)}`
+              : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+            UI.closeModal("reminderModal");
+          };
+          UI.openModal("reminderModal");
+        },
+        showSummary: () => {
+          const t = tripsData[currentTripId];
+          const s = {};
+          Object.keys(t.members).forEach(
+            (u) => (s[u] = { total: 0, breakdown: {} })
+          );
+          if (t.txs)
+            Object.values(t.txs).forEach((x) => {
+              if (x.desc !== "Settlement") {
+                const consumers = [];
+                if (x.type == "equal") {
+                  const split = x.amt / x.members.length;
+                  x.members.forEach((m) =>
+                    consumers.push({ uid: m, amt: split })
+                  );
+                } else {
+                  Object.entries(x.details).forEach(([m, a]) =>
+                    consumers.push({ uid: m, amt: a })
+                  );
+                }
+                consumers.forEach((c) => {
+                  if (s[c.uid]) {
+                    s[c.uid].total += c.amt;
+                    const k = x.cat || "Gen";
+                    if (!s[c.uid].breakdown[k]) s[c.uid].breakdown[k] = 0;
+                    s[c.uid].breakdown[k] += c.amt;
+                  }
+                });
+              }
+            });
+          const l = document.getElementById("summaryList");
+          l.innerHTML = "";
+          Object.entries(s)
+            .sort((a, b) => b[1].total - a[1].total)
+            .forEach(([u, d]) => {
+              if (d.total === 0) return;
+              const mem = Utils.resolveMember(u);
+              let bd = "";
+              Object.entries(d.breakdown).forEach(
+                ([k, v]) =>
+                  (bd += `<span style="font-size:11px;margin-right:8px;opacity:0.7">${k}: ${tripCurrency}${v.toFixed(
+                    0
+                  )}</span>`)
+              );
+              l.innerHTML += `<div class="stat-person"><div class="stat-person-header"><span>${
+                mem.displayName
+              }</span><span>${tripCurrency}${d.total.toFixed(
+                0
+              )}</span></div><div style="display:flex;flex-wrap:wrap">${bd}</div></div>`;
+            });
+          UI.openModal("summaryModal");
+        },
+        calcGlobal: () => {
+          let n = 0;
+          Object.values(tripsData).forEach((t) => {
+            if (t.txs && t.members[currentUser.uid])
+              Object.values(t.txs).forEach((x) => {
+                if (x.payer === currentUser.uid) n += x.amt;
+                if (x.type == "equal") {
+                  if (x.members.includes(currentUser.uid))
+                    n -= x.amt / x.members.length;
+                } else if (x.details[currentUser.uid])
+                  n -= x.details[currentUser.uid];
+              });
+          });
+          document.getElementById("globalOwe").innerText =
+            n < 0 ? `₹${Math.abs(n).toFixed(0)}` : "0";
+          document.getElementById("globalOwed").innerText =
+            n > 0 ? `₹${n.toFixed(0)}` : "0";
+        },
+        goHome: () => {
+          currentTripId = null;
+          document.getElementById("tripTab").classList.add("hidden");
+          document.getElementById("homeTab").classList.remove("hidden");
+          App.handleNav("home");
+        },
+        handleNav: (s) => {
+          const i = document.getElementById("navIcon");
+          if (s === "back") {
+            i.innerHTML = `<path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>`;
+            i.setAttribute("stroke", "#fff");
+          } else {
+            i.innerHTML = `<path d="M4 12h16M4 12l6-6m-6 6l6 6"/>`;
+            i.setAttribute("stroke", "url(#grad1)");
+          }
+        },
+        renderTrips: () => {
+          const l = document.getElementById("tripsList");
+          l.innerHTML = "";
+          Object.entries(tripsData).forEach(([id, t]) => {
+            if (t.members && t.members[currentUser.uid])
+              l.innerHTML += `<div class="card" onclick="App.loadTrip('${id}')" style="cursor:pointer;padding:0"><div style="height:100px;background-image:url('${
+                t.banner || ""
+              }');background-size:cover;background-position:center;background-color:var(--input)"></div><div style="padding:15px;display:flex;justify-content:space-between;align-items:center"><div><strong>${
+                t.name
+              }</strong><br><span style="color:var(--sub);font-size:12px">${
+                t.state || ""
+              }</span></div><div>&#10140;</div></div></div>`;
+          });
+        },
+        exportCSV: () => {
+          const t = tripsData[currentTripId];
+          let csv = "Date,Description,Category,Payer,Amount\n";
+          if (t.txs)
+            Object.values(t.txs).forEach((x) => {
+              const d = new Date(x.date).toLocaleDateString();
+              const u = Utils.resolveMember(x.payer);
+              csv += `${d},${x.desc},${x.cat},${u.displayName},${x.amt}\n`;
+            });
+          const link = document.createElement("a");
+          link.href = "data:text/csv;charset=utf-8," + encodeURI(csv);
+          link.download = `${t.name}_expenses.csv`;
+          document.body.appendChild(link);
+          link.click();
+        },
+        // PWA
+        deferredPrompt: null,
+        initPWA: () => {
+          window.addEventListener("beforeinstallprompt", (e) => {
+            e.preventDefault();
+            App.deferredPrompt = e;
+            const btn = document.getElementById("pwaPopup");
+            btn.classList.add("show");
+            document
+              .getElementById("pwaInstallBtn")
+              .addEventListener("click", () => {
+                btn.classList.remove("show");
+                App.deferredPrompt.prompt();
+                App.deferredPrompt = null;
+              });
+          });
+        },
+      };
+
+      // 1. Detect if user is on iOS (iPhone/iPad)
+      const isIos = /iphone|ipad|ipod/.test(
+        window.navigator.userAgent.toLowerCase()
+      );
+
+      // 2. Detect if app is already installed (Standalone mode)
+      const isInStandaloneMode =
+        "standalone" in window.navigator && window.navigator.standalone;
+
+      // 3. Get Elements
+      const pwaPopup = document.getElementById("pwaPopup");
+      const pwaBtn = document.getElementById("pwaInstallBtn"); // Assuming your button has this ID
+
+      // --- LOGIC FOR ANDROID / CHROME ---
+      let deferredPrompt;
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Show popup for Android
+        pwaPopup.classList.add("show");
+      });
+
+      if (pwaBtn) {
+        pwaBtn.addEventListener("click", async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            pwaPopup.classList.remove("show");
+          } else if (isIos) {
+            // iOS doesn't allow a button to install.
+            // We just hide the popup so they can do it manually.
+            pwaPopup.classList.remove("show");
+          }
+        });
+      }
+
+      // --- LOGIC FOR IPHONE (iOS) ---
+      if (isIos && !isInStandaloneMode) {
+        // Wait 2 seconds, then show the popup
+        setTimeout(() => {
+          pwaPopup.classList.add("show");
+
+          // OPTIONAL: Change text for iOS users because the button won't work automatically
+          // You might want to change the innerHTML of your popup to say:
+          // "Tap the Share icon below, then 'Add to Home Screen'"
+          const title = document.querySelector(".pwa-title");
+          const sub = document.querySelector(".pwa-sub");
+          if (title) title.innerText = "Install App";
+          if (sub) sub.innerText = "Tap Share button -> Add to Home Screen";
+          if (pwaBtn) pwaBtn.innerText = "Close"; // Button just closes popup on iOS
+        }, 2000);
+      }
+
+      const UI = {
+        toggleTheme: () => {
+          const t =
+            document.documentElement.getAttribute("data-theme") === "light"
+              ? "dark"
+              : "light";
+          document.documentElement.setAttribute("data-theme", t);
+          localStorage.setItem("theme", t);
+        },
+        openModal: (id) => document.getElementById(id).classList.add("open"),
+        closeModal: (id) =>
+          document.getElementById(id).classList.remove("open"),
+        switchTab: (t) => {
+          document.getElementById("viewTrips").className =
+            t === "trips" ? "view-section" : "view-section hidden";
+          document.getElementById("viewDaily").className =
+            t === "daily" ? "view-section" : "view-section hidden";
+          document.getElementById("navItemTrips").className =
+            t === "trips" ? "nav-item active" : "nav-item";
+          document.getElementById("navItemDaily").className =
+            t === "daily" ? "nav-item active" : "nav-item";
+          if (t === "daily") Daily.init();
+        },
+        initTheme: () => {
+          const t = localStorage.getItem("theme") || "dark";
+          document.documentElement.setAttribute("data-theme", t);
+        },
+      };
+
+      UI.initTheme();
+      App.initPWA();
+    </script>
+  </body>
+</html>
